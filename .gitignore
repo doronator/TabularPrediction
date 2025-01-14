@@ -6,6 +6,7 @@
 **/catboost_info/
 *.arff
 *.py3
+*.tar.gz
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
