@@ -50,6 +50,7 @@ def download_openml_suite(suite_id=99, max_features=500, shuffle=True,
         
         # get the raw arff files:
         data_file_location = os.path.abspath(os.path.join(".", dataset.url.split("/")[-1]))
+        print(data_file_location)
         
         # skip if the arff file is already present:
         if not os.path.exists(data_file_location):
@@ -130,4 +131,4 @@ def system_adaptable_download_openml_suite(seed=41):
 
 if __name__ == "__main__":
     for seed in range(41, 47):
-        system_adaptable_download_openml_suite(seed)
+        system_adaptable_download_openml_suite(seed=seed)
