@@ -2,20 +2,20 @@ import time
 
 from hyperopt import hp
 
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+
 from tabular_prediction.utils import is_classification, preprocess_impute, eval_complete_f
 
 MULTITHREAD = -1
 
 param_grid = {
     'n_estimators': hp.randint('n_estimators', 20, 200),
-    'max_features': hp.choice('max_features', ['auto', 'sqrt']),
+    'max_features': hp.choice('max_features', ['log2', 'sqrt', None]),
     'max_depth': hp.randint('max_depth', 1, 45),
     'min_samples_split': hp.choice('min_samples_split', [5, 10])
 }
 
 def randomforest_predict(x, y, test_x, test_y, metric_used, cat_features=None, max_time=300, no_tune=None):
-    from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
-
     x, y, test_x, test_y, cat_features = preprocess_impute(x, y, test_x, test_y,
         one_hot=False, impute=True, standardize=False, cat_features=cat_features)
 
