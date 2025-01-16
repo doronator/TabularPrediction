@@ -18,9 +18,12 @@ param_grid = {
     'iterations': hp.randint('iterations', 100, 4000), # This is smaller than in paper, 4000 leads to ram overusage
 }
 
-def get_scoring_string(metric_used):
+def get_scoring_string(metric_used, num_of_classes):
     if metric_used.__name__ == "cross_entropy_metric":
-        return 'Logloss'
+        if num_of_classes > 2:
+            return 'MultiClass'
+        else:
+            return 'Logloss' ### does not work for multiclass with CatBoost
     elif metric_used.__name__ == "rmse_metric":
         return 'RMSE'
     elif metric_used.__name__ == "mae_metric":
@@ -48,11 +51,16 @@ def catboost_predict(x, y, test_x, test_y, metric_used, cat_features=None, max_t
 
     x = make_pd_from_np(x, cat_features=cat_features)
     test_x = make_pd_from_np(test_x, cat_features=cat_features)
+    
+    num_of_classes = len(np.unique(y))
 
     def model_(**params):
         if is_classification(metric_used):
+            loss_function = get_scoring_string(metric_used, num_of_classes)
+            print(loss_function)
+            
             return CatBoostClassifier(
-                loss_function=get_scoring_string(metric_used),
+                loss_function=loss_function,
                 thread_count=MULTITHREAD,
                 used_ram_limit='4gb',
                 random_seed=int(y[:].sum()),
@@ -62,7 +70,7 @@ def catboost_predict(x, y, test_x, test_y, metric_used, cat_features=None, max_t
                 **params)
         else:
             return CatBoostRegressor(
-                loss_function=get_scoring_string(metric_used),
+                loss_function=get_scoring_string(metric_used, num_of_classes),
                 thread_count=MULTITHREAD,
                 used_ram_limit='4gb',
                 random_seed=int(y[:].sum()),
