@@ -8,17 +8,20 @@ from tabular_prediction.metrics import accuracy_metric, balanced_accuracy_metric
 # all datasets
 
 from read_data import get_datasets
-    
+from handle_results import prepare_results_file, write_results
 
 def run_evaluation(split, gpu_id=0, parallelize_datasets=False):
     max_time = [1, 5, 10, 30, 60, 120, 300, 600, 3600]
 
     data_dir, datasets = get_datasets(split)
 
-    with open(f"../results/saint-classification-{split}.csv", "a") as f:
-        f.write(','.join(["dataset", "acc", "bacc", "ce", "auc", "time"]))
-        f.write('\n')
-        f.flush()
+    result_file = f"../results/saint-classification-{split}.csv"
+
+    previous_results = prepare_results_file(result_file)
+    if previous_results is None:
+        exit()
+        
+    with open(result_file, "a") as f:
         for i, dataset in enumerate(datasets):
             if parallelize_datasets:
                 run_id="_".join([dataset.split(".")[0], str(split)])
@@ -27,6 +30,16 @@ def run_evaluation(split, gpu_id=0, parallelize_datasets=False):
                 
             data = torch.load(os.path.join(data_dir, dataset), map_location='cpu')
             x_train, y_train, x_test, y_test = data["data"]
+            
+            total_num_of_samples = (x_train.shape[0] + x_test.shape[0])
+            if total_num_of_samples > 625:
+                print(f"Skipping {dataset} total_num_of_samples={total_num_of_samples}")
+                continue
+            
+            if dataset in previous_results:
+                assert previous_results.loc[dataset] == len(max_time)
+                continue
+            
             cat_features = torch.where(data["cat_features"])[0]
 
             test_y, summary, _ = saint_predict(
@@ -34,12 +47,7 @@ def run_evaluation(split, gpu_id=0, parallelize_datasets=False):
                 metric_used=cross_entropy_metric, max_time=max_time, gpu_id=gpu_id, 
                 run_id=run_id,
                 )
-            for stop_time in summary:
-                pred = summary[stop_time]['pred']
-                run_time = summary[stop_time]['tune_time'] + summary[stop_time]['train_time'] + summary[stop_time]['predict_time']
-                f.write(','.join([dataset] + [f'{val:5.4f}' for val in [accuracy_metric(test_y, pred), balanced_accuracy_metric(test_y, pred), cross_entropy_metric(test_y, pred), auc_metric(test_y, pred), run_time]]))
-                f.write('\n')
-                f.flush()
+            write_results(test_y, summary, max_time, dataset, file_handler=f)
                 
 
 parser = argparse.ArgumentParser()

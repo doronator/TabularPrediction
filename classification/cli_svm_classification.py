@@ -20,12 +20,19 @@ def run_evaluation(split):
         exit()
         
     with open(result_file, "a") as f:
-        f.write(','.join(["dataset", "acc", "bacc", "ce", "auc", "time"]))
-        f.write('\n')
-        f.flush()
         for i, dataset in enumerate(datasets):
             data = torch.load(os.path.join(data_dir, dataset), map_location='cpu')
             x_train, y_train, x_test, y_test = data["data"]
+                                    
+            total_num_of_samples = (x_train.shape[0] + x_test.shape[0])
+            if total_num_of_samples > 625:
+                print(f"Skipping {dataset} total_num_of_samples={total_num_of_samples}")
+                continue
+            
+            if dataset in previous_results:
+                assert previous_results.loc[dataset] == len(max_time)
+                continue
+            
             cat_features = torch.where(data["cat_features"])[0].to(torch.int32)
 
             test_y, summary, _ = svm_predict(x_train, y_train, x_test, y_test, cat_features=cat_features, metric_used=cross_entropy_metric, max_time=max_time)
