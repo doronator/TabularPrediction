@@ -23,11 +23,15 @@ def run_evaluation(split):
 
     with open(result_file, "a") as f:
         for i, dataset in enumerate(datasets):
-            data = torch.load(os.path.join(data_dir, dataset), map_location='cpu') # for GPUs - should this not be GPU?
+            try:
+                data = torch.load(os.path.join(data_dir, dataset), map_location='cpu') # for GPUs - should this not be GPU?
+            except Exception as e:
+                print(f"Oy vey! dataset {dataset} failed to load -- skipping")
+                continue
             x_train, y_train, x_test, y_test = data["data"]
                         
             total_num_of_samples = (x_train.shape[0] + x_test.shape[0])
-            if total_num_of_samples > 625:
+            if total_num_of_samples > 5000:
                 print(f"Skipping {dataset} total_num_of_samples={total_num_of_samples}")
                 continue
             
