@@ -7,6 +7,7 @@ from tabular_prediction.metrics import accuracy_metric, balanced_accuracy_metric
 
 from read_data import get_datasets
 from handle_results import prepare_results_file, write_results
+from pickle import UnpicklingError
     
 def run_evaluation(split):
     max_time = [1, 5, 10, 30, 60, 120, 300, 600, 3600]
@@ -21,11 +22,16 @@ def run_evaluation(split):
         
     with open(result_file, "a") as f:
         for i, dataset in enumerate(datasets):
-            data = torch.load(os.path.join(data_dir, dataset), map_location='cpu')
+            try:
+                data = torch.load(os.path.join(data_dir, dataset), map_location='cpu')
+            except UnpicklingError:
+                href_str = "https://stackoverflow.com/questions/33049688/what-causes-the-error-pickle-unpicklingerror-invalid-load-key"
+                print(f"Oy Vey! might have to recreate {dataset} - it may have been gzipped at some point, and that might have ruined it. \nSee {href_str}")
+                continue
             x_train, y_train, x_test, y_test = data["data"]
                                     
             total_num_of_samples = (x_train.shape[0] + x_test.shape[0])
-            if total_num_of_samples > 625:
+            if total_num_of_samples > 5000:
                 print(f"Skipping {dataset} total_num_of_samples={total_num_of_samples}")
                 continue
             
