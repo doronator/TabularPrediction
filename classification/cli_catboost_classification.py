@@ -22,6 +22,11 @@ def run_evaluation(split, gpu_id=0):
         for i, dataset in enumerate(datasets):
             data = torch.load(os.path.join(data_dir, dataset), map_location='cpu')
             x_train, y_train, x_test, y_test = data["data"]
+            
+            print(x_train.shape)
+            print(x_test.shape)
+            exit()
+            
             cat_features = torch.where(data["cat_features"])[0]
 
             test_y, summary, _ = catboost_predict(x_train, y_train, x_test, y_test, cat_features=cat_features, metric_used=cross_entropy_metric, max_time=max_time, gpu_id=gpu_id)
@@ -42,6 +47,7 @@ args = parser.parse_args()
 
 if args.multi_processing:
     print("Running with multiprocessing!")
+    exit()
     with Pool(processes=6) as p:
         print(p.map(run_evaluation, range(1, 7)))
 else:
@@ -49,6 +55,7 @@ else:
     assert split in range(1,7)
     
     print(f"Running with a single GPU! GPU={args.gpu}, split={split}")
+    exit()
 
     print(f"starting split {split}")
     run_evaluation(split=split, gpu_id=args.gpu)
