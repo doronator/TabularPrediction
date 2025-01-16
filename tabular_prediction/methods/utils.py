@@ -387,8 +387,8 @@ class BaseModelTorch(BaseModel):
                 min_val_loss_idx = epoch
 
                 # Save the currently best model
-                self.save_model(filename_extension="best", directory=self.directory)
-                #self.save_model(filename_extension="best")
+                # self.save_model(filename_extension="best", directory=self.directory)
+                self.save_model(filename_extension="best")
                 
             if min_val_loss_idx + self.early_stopping_rounds < epoch:
                 print(
