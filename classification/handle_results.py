@@ -3,7 +3,7 @@ import os
 import datetime
 from tabular_prediction.metrics import accuracy_metric, balanced_accuracy_metric, cross_entropy_metric, auc_metric
 
-def prepare_results_file(result_file):
+def prepare_results_file(result_file, max_time):
     results_schema = ["dataset_name", "acc", "bacc", "ce", "auc", "stop_time", "max_time"]
     
     if os.path.exists(result_file):
