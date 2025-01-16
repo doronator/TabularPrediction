@@ -81,9 +81,9 @@ def run_evaluation(split):
 
             test_y, summary, _ = lasso_predict(x_train, y_train, x_test, y_test, cat_features=cat_features, metric_used=cross_entropy_metric, max_time=max_time)
             
-            assert len(summary) == len(max_times_list), "ALERT! somwhoe the number of summaries is different from the number of max_times we supplied"
+            assert len(summary) == len(max_time), "ALERT! somwhoe the number of summaries is different from the number of max_times we supplied"
             
-            for stop_time, _max_time in zip(summary, max_times_list):
+            for stop_time, _max_time in zip(summary, max_time):
                 pred = summary[stop_time]['pred']
                 run_time = summary[stop_time]['tune_time'] + summary[stop_time]['train_time'] + summary[stop_time]['predict_time']
                 f.write(','.join(
@@ -94,7 +94,7 @@ def run_evaluation(split):
                                   auc_metric(test_y, pred), 
                                   run_time]
                                  ]
-                    + [_max_time]))
+                    + [str(_max_time)]))
                 f.write('\n')
                 f.flush()
                 
