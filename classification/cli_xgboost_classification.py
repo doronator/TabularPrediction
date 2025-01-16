@@ -23,7 +23,12 @@ def run_evaluation(split, gpu_id=0):
 
     with open(result_file, "a") as f:
         for i, dataset in enumerate(datasets):
-            data = torch.load(os.path.join(data_dir, dataset), map_location='cpu')
+            try:
+                data = torch.load(os.path.join(data_dir, dataset), map_location='cpu')
+            except UnpicklingError:
+                href_str = "https://stackoverflow.com/questions/33049688/what-causes-the-error-pickle-unpicklingerror-invalid-load-key"
+                print(f"Oy Vey! might have to recreate {dataset} - it may have been gzipped at some point, and that might have ruined it. \nSee {href_str}")
+                continue
             x_train, y_train, x_test, y_test = data["data"]
                             
             total_num_of_samples = (x_train.shape[0] + x_test.shape[0])

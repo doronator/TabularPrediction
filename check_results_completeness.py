@@ -32,5 +32,8 @@ for f in all_files:
     if len(datasets_with_too_many_rows) > 0:
         print(f"Found datasets with too many rows in {f}:")
         print(datasets_with_too_many_rows.head())
+    
+    if (num_of_dataset_included == 68) and (len(datasets_with_too_many_rows) == 0):
+        print(f"This split-run is probably COMPLETE: {f}")
 
 # print(all_files)
