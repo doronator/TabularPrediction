@@ -17,7 +17,7 @@ def run_evaluation(split, gpu_id=0, parallelize_datasets=False):
     
     result_file = f"../results/resnet-classification-{split}.csv"
 
-    previous_results = prepare_results_file(result_file)
+    previous_results = prepare_results_file(result_file, max_time)
     if previous_results is None:
         exit()
         

@@ -17,7 +17,7 @@ def run_evaluation(split):
     
     result_file = f"../results/lightgbm-classification-{split}.csv"
     
-    previous_results = prepare_results_file(result_file)
+    previous_results = prepare_results_file(result_file, max_time)
     if previous_results is None:
         exit()
 

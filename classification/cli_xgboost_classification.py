@@ -17,7 +17,7 @@ def run_evaluation(split, gpu_id=0):
     
     result_file = f"../results/xgboost-classification-{split}.csv"
     
-    previous_results = prepare_results_file(result_file)
+    previous_results = prepare_results_file(result_file, max_time)
     if previous_results is None:
         exit()
 
