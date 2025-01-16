@@ -7,6 +7,7 @@ from tabular_prediction.metrics import accuracy_metric, balanced_accuracy_metric
 
 from read_data import get_datasets
 from handle_results import prepare_results_file, write_results
+from pickle import UnpicklingError
 
 def run_evaluation(split):
     max_time = [1, 5, 10, 30, 60, 120, 300, 600, 3600]

@@ -29,7 +29,10 @@ def prepare_results_file(result_file, max_time):
                 
                 num_of_rows_per_dataset = existing_results_df.groupby("dataset_name")["stop_time"].count()
                 bad_datasets = num_of_rows_per_dataset[num_of_rows_per_dataset != len(max_time)]
-                assert (num_of_rows_per_dataset == len(max_time)).all(), f"Error! some datasets did not have the right number of rows: {bad_datasets.head()}. Might be too hairy to salvage results from this file"
+                if len(bad_datasets):
+                    print(f"Error! some datasets did not have the right number of rows: {bad_datasets.head()}. Skipping these in extracting results - otherwise too hairy to deal with!")
+                    rows_to_skip = existing_results_df.dataset_name.isin(bad_datasets.index)
+                    existing_results_df = existing_results_df[~rows_to_skip]
                 
                 existing_results_df["max_time"] = existing_results_df.groupby("dataset_name")["stop_time"].cumcount()
                 existing_results_df["max_time"] = existing_results_df["max_time"].map(pd.Series(max_time))
