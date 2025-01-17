@@ -374,10 +374,20 @@ class BaseModelTorch(BaseModel):
                     #out = out.squeeze()
                     out = out.reshape((batch_val_X.shape[0], ))
 
-                val_loss += loss_func(out, batch_val_y.to(self.device))
+                _val_loss = loss_func(out, batch_val_y.to(self.device))
+                if np.isnan(_val_loss.item()):
+                    print("got nonsense from the loss function")
+                val_loss += _val_loss
                 val_dim += 1
 
             val_loss /= val_dim
+            
+            #### Attempt at fixingloss_val = nan issue for breast-w dataset
+            # if np.isnan(val_loss.item()):
+            #     val_loss = torch.tensor(float('inf'))
+            #     if epoch == 0:
+            #         self.save_model(filename_extension="best")
+            
             val_loss_history.append(val_loss.item())
 
             print("Epoch %d, Val Loss: %.5f" % (epoch, val_loss))

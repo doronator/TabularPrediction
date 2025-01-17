@@ -41,6 +41,8 @@ def run_evaluation(split, gpu_id=0):
                 continue
             
             cat_features = torch.where(data["cat_features"])[0]
+            
+            print(f"Starting catboost with dataset={dataset}")
 
             test_y, summary, _ = catboost_predict(x_train, y_train, x_test, y_test, cat_features=cat_features, metric_used=cross_entropy_metric, max_time=max_time, gpu_id=gpu_id)
             write_results(test_y, summary, max_time, dataset, file_handler=f)
