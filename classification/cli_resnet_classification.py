@@ -4,8 +4,9 @@ import torch
 from multiprocessing import Pool
 from tabular_prediction.methods import resnet_predict
 from tabular_prediction.metrics import accuracy_metric, balanced_accuracy_metric, cross_entropy_metric, auc_metric
+from tabular_prediction.utils import FailureToTuneHPs
 import shutil
-from read_data import get_datasets
+from read_data import get_datasets, verify_number_of_classes
 from handle_results import prepare_results_file, write_results
 from pickle import UnpicklingError
 
@@ -22,6 +23,7 @@ def run_evaluation(split, gpu_id=0, parallelize_datasets=False):
         
     with open(result_file, "a") as f:
         for i, dataset in enumerate(datasets):
+            print(f"Puac! Working dataset {dataset}")
             if parallelize_datasets:
                 run_id="_".join([dataset.split(".")[0], str(split)])
             else:
@@ -34,6 +36,7 @@ def run_evaluation(split, gpu_id=0, parallelize_datasets=False):
                 print(f"Oy Vey! might have to recreate {dataset} - it may have been gzipped at some point, and that might have ruined it. \nSee {href_str}")
                 continue
             x_train, y_train, x_test, y_test = data["data"]
+            verify_number_of_classes(y_train, y_test)
             
             total_num_of_samples = (x_train.shape[0] + x_test.shape[0])
             if total_num_of_samples > 5000:
@@ -47,13 +50,18 @@ def run_evaluation(split, gpu_id=0, parallelize_datasets=False):
             cat_features = torch.where(data["cat_features"])[0]
 
             save_dir = os.path.join("output/", "TabResNet", f"split_{split}",  dataset)
-            test_y, summary, _ = resnet_predict(
-                x_train, y_train, x_test, y_test, cat_features=cat_features, 
-                metric_used=cross_entropy_metric, max_time=max_time, gpu_id=gpu_id, 
-                save_dir=save_dir,
-                )
-            write_results(test_y, summary, max_time, dataset, file_handler=f)
-            shutil.rmtree(save_dir)
+            try:
+                test_y, summary, _ = resnet_predict(
+                    x_train, y_train, x_test, y_test, cat_features=cat_features, 
+                    metric_used=cross_entropy_metric, max_time=max_time, gpu_id=gpu_id, 
+                    save_dir=save_dir,
+                    )
+                write_results(test_y, summary, max_time, dataset, file_handler=f)
+                shutil.rmtree(save_dir)
+            except FailureToTuneHPs as e:
+                print(e)
+                print(f"Failed at HP tuning, skipping dataset {dataset}")
+                continue
                 
 
 parser = argparse.ArgumentParser()

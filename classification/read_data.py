@@ -1,5 +1,5 @@
 import os
-
+import numpy as np
 def get_datasets(split):
     exclusions = ['mnist_784.pt', 'CIFAR_10.pt', 'Devnagari-Script.pt', 'Fashion-MNIST.pt']
     
@@ -16,4 +16,12 @@ def get_datasets(split):
     file_sizes.sort(key=lambda x: x[1], reverse=False)
     
     return data_dir, [f_name for f_name, _ in file_sizes]
+
+
+def verify_number_of_classes(y_train, y_test):
+    num_of_classes_train = len(np.unique(y_train))
+    num_of_classes_test = len(np.unique(y_test))
+    
+    assert num_of_classes_train == num_of_classes_test
+    assert num_of_classes_test > 1
     

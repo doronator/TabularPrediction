@@ -4,6 +4,7 @@ import torch
 from multiprocessing import Pool
 from tabular_prediction.methods import saint_predict
 from tabular_prediction.metrics import accuracy_metric, balanced_accuracy_metric, cross_entropy_metric, auc_metric
+from tabular_prediction.utils import FailureToTuneHPs
 import shutil
 from read_data import get_datasets
 from handle_results import prepare_results_file, write_results
@@ -47,13 +48,18 @@ def run_evaluation(split, gpu_id=0, parallelize_datasets=False):
             cat_features = torch.where(data["cat_features"])[0]
 
             save_dir = os.path.join("output/", "SAINT", f"split_{split}", dataset)
-            test_y, summary, _ = saint_predict(
-                x_train, y_train, x_test, y_test, cat_features=cat_features, 
-                metric_used=cross_entropy_metric, max_time=max_time, gpu_id=gpu_id, 
-                save_dir=save_dir,
-                )
-            write_results(test_y, summary, max_time, dataset, file_handler=f)
-            shutil.rmtree(save_dir)
+            try:
+                test_y, summary, _ = saint_predict(
+                    x_train, y_train, x_test, y_test, cat_features=cat_features, 
+                    metric_used=cross_entropy_metric, max_time=max_time, gpu_id=gpu_id, 
+                    save_dir=save_dir,
+                    )
+                write_results(test_y, summary, max_time, dataset, file_handler=f)
+                shutil.rmtree(save_dir)
+            except FailureToTuneHPs as e:
+                print(e)
+                print(f"Failed at HP tuning, skipping dataset {dataset}")
+                continue
                 
 
 parser = argparse.ArgumentParser()

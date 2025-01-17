@@ -18,6 +18,9 @@ CV = 5
 class ColumnMissingError(Exception):
     pass
 
+class FailureToTuneHPs(Exception):
+    pass
+
 
 def is_classification(metric_used):
     if metric_used.__name__ in ["accuracy_metric", "cross_entropy_metric", "auc_metric", "balanced_accuracy_metric", "average_precision_metric"]:
@@ -181,17 +184,21 @@ def eval_complete_f_deep(x, y, test_x, model_, param_grid, metric_used, max_time
                 count += 1
                 return (count + 1)/count * (time.time() - start_time) > time_budget, [count]
 
-            best = fmin(
-                fn=lambda params: eval_f_deep(params, model_, x, y, metric_used),
-                space=param_grid,
-                algo=rand.suggest,
-                #rstate=np.random.default_rng(int(y[:].sum() + stop_time) % 10000),
-                early_stop_fn=stop,
-                trials=trials,
-                catch_eval_exceptions=True,
-                verbose=True,
-                # The seed is deterministic but varies for each dataset and each split of it
-                max_evals=1000)
+            try:
+                best = fmin(
+                    fn=lambda params: eval_f_deep(params, model_, x, y, metric_used),
+                    space=param_grid,
+                    algo=rand.suggest,
+                    #rstate=np.random.default_rng(int(y[:].sum() + stop_time) % 10000),
+                    early_stop_fn=stop,
+                    trials=trials,
+                    catch_eval_exceptions=True,
+                    verbose=True,
+                    # The seed is deterministic but varies for each dataset and each split of it
+                    max_evals=1000)
+            except Exception as e:
+                print(e)
+                raise FailureToTuneHPs("Aw shucks, a hyperparameter tuning failure - see details right before this")
             best_idx = np.argmin([t['result']['loss'] for t in trials.trials])
             best_path = trials.trials[best_idx]['result']['model_path']
             used_time += time.time() - start_time
