@@ -5,7 +5,7 @@ assert os.getenv("OpenML_API_KEY") or os.getenv("OPENML_API_KEY"), "OpenML_API_K
 import math
 import openml
 import numpy as np
-
+import envfuncs
 import torch
 import requests
 
@@ -36,7 +36,10 @@ def download_openml_suite(suite_id=99, max_features=500, shuffle=True,
     os.makedirs(split_dir, exist_ok=True)
 
     benchmark_suite = openml.study.get_suite(suite_id=suite_id)
-    datalist = openml.datasets.list_datasets(data_id=benchmark_suite.data, output_format='dataframe')
+    # datalist = openml.datasets.list_datasets(data_id=benchmark_suite.data, output_format='dataframe')
+
+    print(benchmark_suite)
+    exit()
 
     n_classes = []
     for _, ds in enumerate(datalist.index):
@@ -115,19 +118,20 @@ def download_openml_suite(suite_id=99, max_features=500, shuffle=True,
 
 
 def system_adaptable_download_openml_suite(seed=41):
-    print("Let the data download, begin!")
-    try:
-        # time-limited version of download_openml_suite(seed=seed):
-        max_wait_time = 10 # seconds
-        my_square = func_timeout.func_timeout(max_wait_time, download_openml_suite, args=[seed])
-        # except func_timeout.FunctionTimedOut:
-    except (func_timeout.FunctionTimedOut, Exception) as e:  
-        print("Attempting to use proxy black magic to download data!")
-        import envfuncs
-        with envfuncs.proxy_context(select="authproxy"):
-            download_openml_suite(seed=seed)
+    # print("Let the data download, begin!")
+    # try:
+    #     # time-limited version of download_openml_suite(seed=seed):
+    #     max_wait_time = 10 # seconds
+    #     my_square = func_timeout.func_timeout(max_wait_time, download_openml_suite, args=[seed])
+    #     # except func_timeout.FunctionTimedOut:
+    # except (func_timeout.FunctionTimedOut, Exception) as e:  
+
+    print("Attempting to use proxy black magic to download data!")
+    
+    with envfuncs.proxy_context(select="authproxy"):
+        download_openml_suite(seed=seed)
 
 
 if __name__ == "__main__":
-    for seed in range(41, 47):
+    for seed in range(41, 47)[:1]:
         system_adaptable_download_openml_suite(seed)
