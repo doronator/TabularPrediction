@@ -22,6 +22,7 @@ def run_evaluation(split):
         
     with open(result_file, "a") as f:
         for i, dataset in enumerate(datasets):
+            print(f"Working on dataset {dataset}")
             try:
                 data = torch.load(os.path.join(data_dir, dataset), map_location='cpu')
             except UnpicklingError:
@@ -30,10 +31,10 @@ def run_evaluation(split):
                 continue
             x_train, y_train, x_test, y_test = data["data"]
                                     
-            total_num_of_samples = (x_train.shape[0] + x_test.shape[0])
-            if total_num_of_samples > 5000:
-                print(f"Skipping {dataset} total_num_of_samples={total_num_of_samples}")
-                continue
+            # total_num_of_samples = (x_train.shape[0] + x_test.shape[0])
+            # if total_num_of_samples > 5000:
+            #     print(f"Skipping {dataset} total_num_of_samples={total_num_of_samples}")
+            #     continue
             
             if dataset in previous_results:
                 assert previous_results.loc[dataset] == len(max_time)
