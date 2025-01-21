@@ -38,10 +38,10 @@ def run_evaluation(split, gpu_id=0, parallelize_datasets=False):
             x_train, y_train, x_test, y_test = data["data"]
             verify_number_of_classes(y_train, y_test)
             
-            total_num_of_samples = (x_train.shape[0] + x_test.shape[0])
-            if total_num_of_samples > 5000:
-                print(f"Skipping {dataset} total_num_of_samples={total_num_of_samples}")
-                continue
+            # total_num_of_samples = (x_train.shape[0] + x_test.shape[0])
+            # if total_num_of_samples > 5000:
+            #     print(f"Skipping {dataset} total_num_of_samples={total_num_of_samples}")
+            #     continue
             
             if dataset in previous_results:
                 assert previous_results.loc[dataset] == len(max_time)
