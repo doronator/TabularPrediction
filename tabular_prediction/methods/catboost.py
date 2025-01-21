@@ -20,10 +20,7 @@ param_grid = {
 
 def get_scoring_string(metric_used, num_of_classes):
     if metric_used.__name__ == "cross_entropy_metric":
-        if num_of_classes > 2:
-            return 'MultiClass'
-        else:
-            return 'Logloss' ### does not work for multiclass with CatBoost
+        return 'MultiClass'
     elif metric_used.__name__ == "rmse_metric":
         return 'RMSE'
     elif metric_used.__name__ == "mae_metric":
@@ -38,8 +35,11 @@ def catboost_predict(x, y, test_x, test_y, metric_used, cat_features=None, max_t
         one_hot=False, impute=False, standardize=False, cat_features=cat_features)
 
     # Nans in categorical features must be encoded as separate class
+    cat_features_min = np.nanmin(np.concatenate((x, test_x), axis=0)[:, cat_features], axis=0)
+    x[:, cat_features] = x[:, cat_features] - cat_features_min
+    test_x[:, cat_features] = test_x[:, cat_features] - cat_features_min
     x[:, cat_features], test_x[:, cat_features] = (
-        np.nan_to_num(x[:, cat_features], -1), np.nan_to_num(test_x[:, cat_features], -1)
+        np.nan_to_num(x[:, cat_features], nan=-1), np.nan_to_num(test_x[:, cat_features], nan=-1)
     )
 
     if gpu_id is not None:
