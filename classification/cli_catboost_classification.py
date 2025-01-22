@@ -8,6 +8,7 @@ from read_data import get_datasets
 from handle_results import prepare_results_file, write_results
 from pickle import UnpicklingError
 from multiprocessing import Pool
+from catboost import CatBoostError
 
 def run_evaluation(split, gpu_id=0):
     max_time = [1, 5, 10, 30, 60, 120, 300, 600, 3600]
@@ -40,9 +41,7 @@ def run_evaluation(split, gpu_id=0):
                 continue
             
             cat_features = torch.where(data["cat_features"])[0]
-            
-            print(f"Starting catboost with dataset={dataset}")
-            
+
             try:
                 test_y, summary, _ = catboost_predict(
                     x_train, y_train, x_test, y_test, cat_features=cat_features, 
@@ -50,6 +49,8 @@ def run_evaluation(split, gpu_id=0):
                     # gpu_id=gpu_id
                     )
                 write_results(test_y, summary, max_time, dataset, file_handler=f)
+            except CatBoostError as e:
+                raise e
             except Exception as e:
                 print(e)
                 print(f"Failed at something, skipping dataset {dataset}")
