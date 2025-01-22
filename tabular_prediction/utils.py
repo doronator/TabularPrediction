@@ -89,7 +89,7 @@ def get_scoring_string(metric_used):
         raise Exception('No scoring string found for metric')
 
 def eval_f(params, model_, x, y, metric_used, cv=5):
-    scores = cross_val_score(model_(**params), x, y, cv=cv, scoring=get_scoring_string(metric_used))
+    scores = cross_val_score(model_(**params), x, y, cv=cv, scoring=get_scoring_string(metric_used), error_score='raise')
     return -np.nanmean(scores)
 
 def eval_complete_f(x, y, test_x, model_, param_grid, metric_used, max_time, no_tune, cv=5, run_default=True):
