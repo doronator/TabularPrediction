@@ -2,7 +2,7 @@ import time
 import math
 
 import numpy as np
-
+import pandas as pd
 from hyperopt import hp
 
 from tabular_prediction.utils import is_classification, make_pd_from_np, preprocess_impute, eval_complete_f
@@ -78,6 +78,12 @@ def catboost_predict(x, y, test_x, test_y, metric_used, cat_features=None, max_t
                 cat_features=cat_features,
                 **gpu_params,
                 **params)
+
+
+    # convert categorical columns to integer valuesto avoid catboost error:
+    for col in cat_features:
+        x[col] = x[col].astype(int)
+        test_x[col] = test_x[col].astype(int)
 
     start_time = time.time()
     summary = eval_complete_f(x, y, test_x, model_, param_grid, metric_used, max_time, no_tune)
