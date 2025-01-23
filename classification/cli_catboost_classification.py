@@ -23,6 +23,7 @@ def run_evaluation(split, gpu_id=0):
         
     with open(result_file, "a") as f:
         for i, dataset in enumerate(datasets):
+            print(f"Working dataset {dataset}")
             try:
                 data = torch.load(os.path.join(data_dir, dataset), map_location='cpu')
             except UnpicklingError:

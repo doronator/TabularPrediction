@@ -23,6 +23,7 @@ def run_evaluation(split, gpu_id=0, parallelize_datasets=False):
         
     with open(result_file, "a") as f:
         for i, dataset in enumerate(datasets):
+            print(f"Working dataset {dataset}")
             if parallelize_datasets:
                 run_id="_".join([dataset.split(".")[0], str(split)])
             else:

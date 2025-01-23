@@ -24,6 +24,7 @@ def run_evaluation(split):
 
     with open(result_file, "a") as f:
         for i, dataset in enumerate(datasets):
+            print(f"Working dataset {dataset}")
             try:
                 data = torch.load(os.path.join(data_dir, dataset), map_location='cpu') # for GPUs - should this not be GPU?
             except Exception as e:
